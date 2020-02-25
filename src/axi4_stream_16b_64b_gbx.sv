@@ -44,7 +44,7 @@ always_ff @( posedge clk_i, posedge rst_i )
     end
   else
     if( rx_handshake )
-      if( byte_ins == 2'd0 )
+      if( ins_pos == 2'd0 )
         begin
           pkt_o.tdata <= 64'( pkt_i.tdata );
           pkt_o.tkeep <= 8'( pkt_i.tkeep );
@@ -52,9 +52,9 @@ always_ff @( posedge clk_i, posedge rst_i )
         end
       else
         begin
-          pkt_o.tdata[( ins + 1 ) * 16 - 1 -: 16] <= pkt_i.tdata;
-          pkt_o.tkeep[( ins + 1 ) * 2 - 1 -: 2]   <= pkt_i.tkeep;
-          pkt_o.tstrb[( ins + 1 ) * 2 - 1 -: 2]   <= pkt_i.tstrb;
+          pkt_o.tdata[( ins_pos + 1 ) * 16 - 1 -: 16] <= pkt_i.tdata;
+          pkt_o.tkeep[( ins_pos + 1 ) * 2 - 1 -: 2]   <= pkt_i.tkeep;
+          pkt_o.tstrb[( ins_pos + 1 ) * 2 - 1 -: 2]   <= pkt_i.tstrb;
         end
 
 always_ff @( posedge clk_i, posedge rst_i )

@@ -1,3 +1,6 @@
+`include "../lib/axi4_lib/src/class/AXI4StreamMaster.sv"
+`include "../lib/axi4_lib/src/class/AXI4StreamSlave.sv"
+
 module tb_frame_buffer;
 
 parameter int RANDOM_TVALID = 1;
@@ -26,7 +29,7 @@ axi4_stream_if #(
 );
 
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16   ),
+  .TDATA_WIDTH ( 64   ),
   .TID_WIDTH   ( 1    ),
   .TDEST_WIDTH ( 1    ),
   .TUSER_WIDTH ( 1    )
@@ -147,7 +150,7 @@ initial
       end
     repeat( 10 )
       @( posedge clk );
-    $dispaly( "Everything is fine." );
+    $display( "Everything is fine." );
     $stop();
   end
 
