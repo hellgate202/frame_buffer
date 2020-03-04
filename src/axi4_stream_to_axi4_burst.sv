@@ -133,7 +133,7 @@ always_ff @( posedge clk_i, posedge rst_i )
       cur_addr <= { addr_i[ADDR_WIDTH - 1 : ADDR_WORD_BITS], ADDR_WORD_BITS'( 0 ) };
     else
       if( w_handshake )
-        cur_addr <= cur_addr + 1'b1;
+        cur_addr <= cur_addr + ADDR_WIDTH'( DATA_WIDTH_B );
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
@@ -152,6 +152,16 @@ always_ff @( posedge clk_i, posedge rst_i )
       else
         burst_o.awlen <= 8'( pkt_words_left ) - 1'b1;
 
+always_ff @( posedge clk_i, posedge rst_i )
+  if( rst_i )
+    burst_o.awvalid <= 1'b0;
+  else
+    if( state == CALC_BURST_S )
+      burst_o.awvalid <= 1'b1;
+    else
+      if( burst_o.awready )
+        burst_o.awvalid <= 1'b0;
+
 assign burst_o.awid     = ID_WIDTH'( 0 );
 assign burst_o.awsize   = 3'( $clog2( DATA_WIDTH_B ) );
 assign burst_o.awburst  = 2'b01;
@@ -166,7 +176,7 @@ assign burst_o.wstrb    = pkt_i.tstrb;
 assign burst_o.wlast    = state == BURST_IN_PROGRESS_S && 
                           burst_words_left == MAX_PKT_SIZE_WIDTH'( 0 );
 assign burst_o.wuser    = WUSER_WIDTH'( 0 );
-assign burst_o.wvalid   = state == BURST_IN_PROGRESS_S;
+assign burst_o.wvalid   = state == BURST_IN_PROGRESS_S && pkt_i.tvalid;
 assign burst_o.bready   = 1'b1;
 assign burst_o.arid     = ID_WIDTH'( 0 );
 assign burst_o.araddr   = ADDR_WIDTH'( 0 );
@@ -181,5 +191,6 @@ assign burst_o.arregion = 4'd0;
 assign burst_o.aruser   = ARUSER_WIDTH'( 0 );
 assign burst_o.arvalid  = 1'b0;
 assign burst_o.arready  = 1'b1;
+assign burst_o.rready  = 1'b1;
 
 endmodule

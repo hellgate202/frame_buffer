@@ -1,5 +1,6 @@
 `include "../lib/axi4_lib/src/class/AXI4StreamMaster.sv"
 `include "../lib/axi4_lib/src/class/AXI4StreamSlave.sv"
+`include "../lib/axi4_lib/src/class/AXI4Slave.sv"
 
 module tb_frame_buffer;
 
@@ -12,14 +13,13 @@ typedef bit [7 : 0] pkt_q [$];
 
 bit clk;
 bit rst;
+bit [31 : 0] addr;
+bit [13 : 0] pkt_size;
 
 pkt_q tx_pkt;
 
-mailbox rx_data_mbx  = new();
-mailbox ref_data_mbx = new();
-
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16   ),
+  .TDATA_WIDTH ( 64   ),
   .TID_WIDTH   ( 1    ),
   .TDEST_WIDTH ( 1    ),
   .TUSER_WIDTH ( 1    )
@@ -28,18 +28,8 @@ axi4_stream_if #(
   .aresetn     ( !rst )
 );
 
-axi4_stream_if #(
-  .TDATA_WIDTH ( 64   ),
-  .TID_WIDTH   ( 1    ),
-  .TDEST_WIDTH ( 1    ),
-  .TUSER_WIDTH ( 1    )
-) pkt_i_64 (
-  .aclk        ( clk  ),
-  .aresetn     ( !rst )
-);
-
 AXI4StreamMaster #(
-  .TDATA_WIDTH    ( 16             ),
+  .TDATA_WIDTH    ( 64             ),
   .TID_WIDTH      ( 1              ),
   .TDEST_WIDTH    ( 1              ),
   .TUSER_WIDTH    ( 1              ),
@@ -49,16 +39,20 @@ AXI4StreamMaster #(
   .WATCHDOG_LIMIT ( 200            )
 ) pkt_sender;
 
-AXI4StreamSlave #(
-  .TDATA_WIDTH    ( 64            ),
-  .TID_WIDTH      ( 1             ),
-  .TDEST_WIDTH    ( 1             ),
-  .TUSER_WIDTH    ( 1             ),
-  .RANDOM_TREADY  ( RANDOM_TREADY ),
-  .VERBOSE        ( VERBOSE       ),
-  .WATCHDOG_EN    ( 1'b1          ),
-  .WATCHDOG_LIMIT ( 200           )
-) pkt_receiver;
+axi4_if #(
+  .DATA_WIDTH ( 64   ),
+  .ADDR_WIDTH ( 32   )
+) burst_o (
+  .aclk       ( clk  ),
+  .aresetn    ( !rst )
+);
+
+AXI4Slave #(
+  .DATA_WIDTH    ( 64 ),
+  .ADDR_WIDTH    ( 32 ),
+  .ID_WIDTH      ( 1  ),
+  .RANDOM_WREADY ( 1  )
+) mem;
 
 task automatic clk_gen();
 
@@ -79,76 +73,41 @@ task automatic apply_rst();
 
 endtask
 
-function automatic pkt_q generate_pkt( int size ); 
-
-  pkt_q pkt;
-
+task automatic send_pkt( int size, int start_addr );
+  
+  bit [7 : 0] pkt [$];
   for( int i = 0; i < size; i++ )
-    pkt.push_back( $urandom_range( 255, 0 ) );
-
-  return pkt;
-
-endfunction
-
-task automatic compare_mbx();
-
-  pkt_q rx_pkt;
-  pkt_q ref_pkt;
-
-  fork
-    forever
-      begin
-        if( rx_data_mbx.num() > 0 && ref_data_mbx.num() > 0 )
-          begin
-            rx_data_mbx.get( rx_pkt );
-            ref_data_mbx.get( ref_pkt );
-            if( rx_pkt != ref_pkt )
-              begin
-                $display( "Packet missmatch!" );
-                $display( "Received packet:" );
-                for( int i = 0; i < rx_pkt.size(); i++ )
-                  $write( "%0h ", rx_pkt[i] );
-                $write( "\n" );
-                $display( "Reference packet:" );
-                for( int i = 0; i < ref_pkt.size(); i++ )
-                  $write( "%0h ", ref_pkt[i] );
-                $write( "\n" );
-                $stop();
-              end
-          end
-        else
-          @( posedge clk );
-      end
-  join_none
+    pkt.push_back( i % 256 );
+  addr     = start_addr;
+  pkt_size = size;
+  pkt_sender.tx_data( pkt );
 
 endtask
 
-axi4_stream_16b_64b_gbx DUT
-(
-  .clk_i ( clk      ),
-  .rst_i ( rst      ),
-  .pkt_i ( pkt_i    ),
-  .pkt_o ( pkt_i_64 )
+axi4_stream_to_axi4_burst #(
+  .DATA_WIDTH     ( 64       ),
+  .ADDR_WIDTH     ( 32       ),
+  .MAX_PKT_SIZE_B ( 9600     )
+) DUT (
+  .clk_i          ( clk      ),
+  .rst_i          ( rst      ),
+  .pkt_size_i     ( pkt_size ),
+  .addr_i         ( addr     ),
+  .pkt_i          ( pkt_i    ),
+  .burst_o        ( burst_o  )
 );
 
 initial
   begin
-    pkt_sender   = new( .axi4_stream_if_v ( pkt_i ) );
-    pkt_receiver = new( .axi4_stream_if_v ( pkt_i_64    ),
-                        .rx_data_mbx      ( rx_data_mbx ) );
+    pkt_sender = new( .axi4_stream_if_v ( pkt_i ) );
+    mem        = new( .axi4_if_v ( burst_o ) );
     fork
       clk_gen();
     join_none
-    compare_mbx();
     apply_rst();
     @( posedge clk );
-    repeat( 1000 )
-      begin
-        tx_pkt = generate_pkt( $urandom_range( 24, 1 ) );
-        ref_data_mbx.put( tx_pkt );
-        pkt_sender.tx_data( tx_pkt );
-      end
-    repeat( 10 )
+    send_pkt( 2049, 32'h00fb100 );
+    repeat( 100 )
       @( posedge clk );
     $display( "Everything is fine." );
     $stop();
