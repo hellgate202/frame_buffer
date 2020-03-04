@@ -84,7 +84,7 @@ task automatic send_pkt( int size, int start_addr );
 
 endtask
 
-axi4_stream_to_axi4_burst #(
+axi4_stream_to_axi4 #(
   .DATA_WIDTH     ( 64       ),
   .ADDR_WIDTH     ( 32       ),
   .MAX_PKT_SIZE_B ( 9600     )
@@ -94,7 +94,7 @@ axi4_stream_to_axi4_burst #(
   .pkt_size_i     ( pkt_size ),
   .addr_i         ( addr     ),
   .pkt_i          ( pkt_i    ),
-  .burst_o        ( burst_o  )
+  .mem_o          ( burst_o  )
 );
 
 initial

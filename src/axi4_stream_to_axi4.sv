@@ -1,4 +1,4 @@
-module axi4_stream_to_axi4_burst #(
+module axi4_stream_to_axi4 #(
   parameter int DATA_WIDTH         = 64,
   parameter int ADDR_WIDTH         = 32,
   parameter int ID_WIDTH           = 1,
@@ -13,7 +13,7 @@ module axi4_stream_to_axi4_burst #(
   input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size_i,
   input [ADDR_WIDTH - 1 : 0]         addr_i,
   axi4_stream_if.slave               pkt_i,
-  axi4_if.master                     burst_o
+  axi4_if.master                     mem_o
 );
 
 localparam int DATA_WIDTH_B   = DATA_WIDTH / 8;
@@ -74,9 +74,9 @@ always_comb
     endcase
   end
 
-assign pkt_i.tready = state == BURST_IN_PROGRESS_S && burst_o.wready;
-assign w_handshake  = burst_o.wvalid && burst_o.wready;
-assign aw_handshake = burst_o.awvalid && burst_o.awready;
+assign pkt_i.tready = state == BURST_IN_PROGRESS_S && mem_o.wready;
+assign w_handshake  = mem_o.wvalid && mem_o.wready;
+assign aw_handshake = mem_o.awvalid && mem_o.awready;
 assign rx_handshake = pkt_i.tvalid && pkt_i.tready;
 
 always_ff @( posedge clk_i, posedge rst_i )
@@ -137,60 +137,60 @@ always_ff @( posedge clk_i, posedge rst_i )
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
-    burst_o.awaddr <= ADDR_WIDTH'( 0 );
+    mem_o.awaddr <= ADDR_WIDTH'( 0 );
   else
     if( state == CALC_BURST_S )
-      burst_o.awaddr <= cur_addr;
+      mem_o.awaddr <= cur_addr;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
-    burst_o.awlen <= 8'd0;
+    mem_o.awlen <= 8'd0;
   else
     if( state == CALC_BURST_S )
       if( pkt_words_left > MAX_PKT_SIZE_WIDTH'( 256 ) )
-        burst_o.awlen <= 8'd255;
+        mem_o.awlen <= 8'd255;
       else
-        burst_o.awlen <= 8'( pkt_words_left ) - 1'b1;
+        mem_o.awlen <= 8'( pkt_words_left ) - 1'b1;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
-    burst_o.awvalid <= 1'b0;
+    mem_o.awvalid <= 1'b0;
   else
     if( state == CALC_BURST_S )
-      burst_o.awvalid <= 1'b1;
+      mem_o.awvalid <= 1'b1;
     else
-      if( burst_o.awready )
-        burst_o.awvalid <= 1'b0;
+      if( mem_o.awready )
+        mem_o.awvalid <= 1'b0;
 
-assign burst_o.awid     = ID_WIDTH'( 0 );
-assign burst_o.awsize   = 3'( $clog2( DATA_WIDTH_B ) );
-assign burst_o.awburst  = 2'b01;
-assign burst_o.awlock   = 1'b0;
-assign burst_o.awcache  = 4'd0;
-assign burst_o.awprot   = 3'd0;
-assign burst_o.awqos    = 4'd0;
-assign burst_o.awregion = 4'd0;
-assign burst_o.awuser   = AWUSER_WIDTH'( 0 );
-assign burst_o.wdata    = pkt_i.tdata;
-assign burst_o.wstrb    = pkt_i.tstrb;
-assign burst_o.wlast    = state == BURST_IN_PROGRESS_S && 
-                          burst_words_left == MAX_PKT_SIZE_WIDTH'( 0 );
-assign burst_o.wuser    = WUSER_WIDTH'( 0 );
-assign burst_o.wvalid   = state == BURST_IN_PROGRESS_S && pkt_i.tvalid;
-assign burst_o.bready   = 1'b1;
-assign burst_o.arid     = ID_WIDTH'( 0 );
-assign burst_o.araddr   = ADDR_WIDTH'( 0 );
-assign burst_o.arlen    = 8'd0;
-assign burst_o.arsize   = 3'( $clog2( DATA_WIDTH_B ) );
-assign burst_o.arburst  = 2'b01;
-assign burst_o.arlock   = 1'b0;
-assign burst_o.arcache  = 4'd0;
-assign burst_o.arprot   = 3'd0;
-assign burst_o.arqos    = 4'd0;
-assign burst_o.arregion = 4'd0;
-assign burst_o.aruser   = ARUSER_WIDTH'( 0 );
-assign burst_o.arvalid  = 1'b0;
-assign burst_o.arready  = 1'b1;
-assign burst_o.rready  = 1'b1;
+assign mem_o.awid     = ID_WIDTH'( 0 );
+assign mem_o.awsize   = 3'( $clog2( DATA_WIDTH_B ) );
+assign mem_o.awburst  = 2'b01;
+assign mem_o.awlock   = 1'b0;
+assign mem_o.awcache  = 4'd0;
+assign mem_o.awprot   = 3'd0;
+assign mem_o.awqos    = 4'd0;
+assign mem_o.awregion = 4'd0;
+assign mem_o.awuser   = AWUSER_WIDTH'( 0 );
+assign mem_o.wdata    = pkt_i.tdata;
+assign mem_o.wstrb    = pkt_i.tstrb;
+assign mem_o.wlast    = state == BURST_IN_PROGRESS_S && 
+                        burst_words_left == MAX_PKT_SIZE_WIDTH'( 0 );
+assign mem_o.wuser    = WUSER_WIDTH'( 0 );
+assign mem_o.wvalid   = state == BURST_IN_PROGRESS_S && pkt_i.tvalid;
+assign mem_o.bready   = 1'b1;
+assign mem_o.arid     = ID_WIDTH'( 0 );
+assign mem_o.araddr   = ADDR_WIDTH'( 0 );
+assign mem_o.arlen    = 8'd0;
+assign mem_o.arsize   = 3'( $clog2( DATA_WIDTH_B ) );
+assign mem_o.arburst  = 2'b01;
+assign mem_o.arlock   = 1'b0;
+assign mem_o.arcache  = 4'd0;
+assign mem_o.arprot   = 3'd0;
+assign mem_o.arqos    = 4'd0;
+assign mem_o.arregion = 4'd0;
+assign mem_o.aruser   = ARUSER_WIDTH'( 0 );
+assign mem_o.arvalid  = 1'b0;
+assign mem_o.arready  = 1'b1;
+assign mem_o.rready  = 1'b1;
 
 endmodule
