@@ -12,7 +12,7 @@ module axi4_to_axi4_stream #(
 )(
   input                              clk_i,
   input                              rst_i,
-  input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size,
+  input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size_i,
   input [ADDR_WIDTH - 1 : 0]         addr_i,
   input                              rd_stb,
   axi4_stream_if.master              pkt_o,
@@ -106,7 +106,7 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     tlast_tstrb <= DATA_WIDTH_B'( 0 );
   else
-    if( state == IDLE && rd_stb )
+    if( state == IDLE_S && rd_stb )
       if( pkt_size_i[ADDR_WORD_BITS - 1 : 0] == ADDR_WORD_BITS'( 0 ) )
         tlast_tstrb <= DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
       else
@@ -150,9 +150,9 @@ always_ff @( posedge clk_i, posedge rst_i )
   else
     if( state == CALC_BURST_S )
       if( pkt_words_left > MAX_PKT_SIZE_WIDTH'( 256 ) )
-        mem_o.awlen <= 8'd255;
+        mem_o.arlen <= 8'd255;
       else
-        mem_o.awlen <= pkt_words_left[7 : 0] - 1'b1;
+        mem_o.arlen <= pkt_words_left[7 : 0] - 1'b1;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
@@ -191,11 +191,11 @@ assign mem_o.arprot   = 3'd0;
 assign mem_o.arqos    = 4'd0;
 assign mem_o.arregion = 4'd0;
 assign mem_o.aruser   = ARUSER_WIDTH'( 0 );
-assign mem_o.rready   = pkt_i.tready;
+assign mem_o.rready   = pkt_o.tready;
 
 assign pkt_o.tdata  = mem_o.rdata;
-assign pkt_o.tstrb  = mem_o.tlast ? tlast_tstrb : DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
-assign pkt_o.tkeep  = mem_o.tlast ? tlast_tstrb : DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
+assign pkt_o.tstrb  = pkt_o.tlast ? tlast_tstrb : DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
+assign pkt_o.tkeep  = pkt_o.tlast ? tlast_tstrb : DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
 assign pkt_o.tvalid = mem_o.rvalid;
 assign pkt_o.tlast  = pkt_words_left == MAX_PKT_SIZE_WIDTH'( 1 );
 assign pkt_o.tid    = ID_WIDTH'( 0 );
