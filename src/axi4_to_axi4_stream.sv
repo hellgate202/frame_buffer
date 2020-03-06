@@ -14,7 +14,7 @@ module axi4_to_axi4_stream #(
   input                              rst_i,
   input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size_i,
   input [ADDR_WIDTH - 1 : 0]         addr_i,
-  input                              rd_stb,
+  input                              rd_stb_i,
   axi4_stream_if.master              pkt_o,
   axi4_if.master                     mem_o
 );
@@ -47,7 +47,7 @@ always_comb
     case( state )
       IDLE_S:
         begin
-          if( rd_stb )
+          if( rd_stb_i )
             next_state = CALC_BURST_S;
         end
       CALC_BURST_S:
@@ -93,7 +93,7 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     pkt_words_left <= MAX_PKT_SIZE_WIDTH'( 0 );
   else
-    if( state == IDLE_S && rd_stb )
+    if( state == IDLE_S && rd_stb_i )
       if( pkt_size_i[ADDR_WORD_BITS - 1 : 0] )
         pkt_words_left <= pkt_size_i[MAX_PKT_SIZE_WIDTH - 1 : ADDR_WORD_BITS] + 1'b1;
       else
@@ -106,7 +106,7 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     tlast_tstrb <= DATA_WIDTH_B'( 0 );
   else
-    if( state == IDLE_S && rd_stb )
+    if( state == IDLE_S && rd_stb_i )
       if( pkt_size_i[ADDR_WORD_BITS - 1 : 0] == ADDR_WORD_BITS'( 0 ) )
         tlast_tstrb <= DATA_WIDTH_B'( 2 ** DATA_WIDTH_B - 1 );
       else
@@ -131,7 +131,7 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     cur_addr <= ADDR_WIDTH'( 0 );
   else
-    if( state == IDLE_S && rd_stb )
+    if( state == IDLE_S && rd_stb_i )
       cur_addr <= { addr_i[ADDR_WIDTH - 1 : ADDR_WORD_BITS], ADDR_WORD_BITS'( 0 ) };
     else
       if( r_handshake )
