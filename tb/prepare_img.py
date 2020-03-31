@@ -62,4 +62,4 @@ print( "Creating sample hex file" )
 with open( "../tb/img.hex", "w+" ) as f:
   for y in range( bayer.shape[0] ):
     for x in range( bayer.shape[1] ):
-      f.write( hex( bayer[y][x] * 16 )[2 : -1]+"\n" )
+      f.write( hex( bayer[y][x] * 4 )[2:]+"\n" )

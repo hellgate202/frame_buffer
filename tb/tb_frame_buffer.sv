@@ -9,7 +9,7 @@ parameter int    FRAME_RES_X = 1920;
 parameter int    FRAME_RES_Y = 1080;
 parameter int    TOTAL_X     = 2200;
 parameter int    TOTAL_Y     = 1125;
-parameter int    PX_WIDTH    = 10;
+parameter int    PX_WIDTH    = 16;
 parameter string FILE_PATH = "./img.hex";
 
 bit clk;

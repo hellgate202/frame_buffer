@@ -67,16 +67,17 @@ always_ff @( posedge clk_i, posedge rst_i )
       line_size_lock  <= ( PKT_SIZE_WIDTH + 1 )'( 0 );
     end
   else
-    begin
-      pkt_i_d1.tdata  <= video_i.tdata; 
-      pkt_i_d1.tstrb  <= video_i.tstrb; 
-      pkt_i_d1.tkeep  <= video_i.tkeep; 
-      pkt_i_d1.tlast  <= video_i.tlast; 
-      pkt_i_d1.tuser  <= video_i.tuser; 
-      pkt_i_d1.tdest  <= video_i.tdest; 
-      pkt_i_d1.tid    <= video_i.tid; 
-      line_size_lock  <= line_size_i;
-    end
+    if( video_i.tready )
+      begin
+        pkt_i_d1.tdata  <= video_i.tdata; 
+        pkt_i_d1.tstrb  <= video_i.tstrb; 
+        pkt_i_d1.tkeep  <= video_i.tkeep; 
+        pkt_i_d1.tlast  <= video_i.tlast; 
+        pkt_i_d1.tuser  <= video_i.tuser; 
+        pkt_i_d1.tdest  <= video_i.tdest; 
+        pkt_i_d1.tid    <= video_i.tid; 
+        line_size_lock  <= line_size_i;
+      end
 
 assign pkt_i_d1.tvalid = tvalid_lock && !ignore_frame;
 

@@ -142,7 +142,7 @@ axi4_to_axi4_stream #(
   .pkt_size_i     ( LINE_SIZE_WIDTH'( BYTES_PER_LINE ) ),
   .addr_i         ( mem_addr                           ),
   .rd_stb_i       ( rd_req                             ),
-  .pkt_o          ( video_line                         ),
+  .pkt_o          ( video_n_tuser                      ),
   .mem_o          ( mem_rd                             )
 );
 
@@ -163,27 +163,27 @@ axi4_stream_fifo #(
   .pkts_amount_o ( lines_in_fifo ),
   .pkt_size_o    (               ),
   .pkt_i         ( video_line    ),
-  .pkt_o         ( video_n_tuser )
+  .pkt_o         ( video_o       )
 );
-
-assign video_o.tdata        = video_n_tuser.tdata;
-assign video_o.tvalid       = video_n_tuser.tvalid;
-assign video_o.tstrb        = video_n_tuser.tstrb;
-assign video_o.tkeep        = video_n_tuser.tkeep;
-assign video_o.tlast        = video_n_tuser.tlast;
-assign video_o.tdest        = video_n_tuser.tdest;
-assign video_o.tid          = video_n_tuser.tid;
-assign video_n_tuser.tready = video_o.tready;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
-    video_o.tuser <= 1'b1;
+    video_line.tuser <= 1'b1;
   else
     if( frame_read_finish )
-      video_o.tuser <= 1'b1;
+      video_line.tuser <= 1'b1;
     else
       if( video_n_tuser.tvalid && video_n_tuser.tready )
-        video_o.tuser <= 1'b0;
+        video_line.tuser <= 1'b0;
+
+assign video_line.tdata     = video_n_tuser.tdata;
+assign video_line.tvalid    = video_n_tuser.tvalid;
+assign video_line.tstrb     = video_n_tuser.tstrb;
+assign video_line.tkeep     = video_n_tuser.tkeep;
+assign video_line.tlast     = video_n_tuser.tlast;
+assign video_line.tdest     = video_n_tuser.tdest;
+assign video_line.tid       = video_n_tuser.tid;
+assign video_n_tuser.tready = video_line.tready;
 
 assign rd_done_stb_o = frame_read_finish;
 
