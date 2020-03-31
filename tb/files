@@ -1,5 +1,15 @@
-../src/axi4_stream_to_axi4.sv
-../src/axi4_to_axi4_stream.sv
 ../lib/axi4_lib/src/interface/axi4_stream_if.sv
 ../lib/axi4_lib/src/interface/axi4_if.sv
+../ip/dual_port_ram/src/dual_port_ram.sv
+../lib/fifo_lib/src/sc_fifo.sv
+../lib/fifo_lib/src/axi4_stream_fifo.sv
+../src/axi4_stream_16b_64b_gbx.sv
+../src/axi4_stream_64b_16b_gbx.sv
+../src/axi4_stream_to_axi4.sv
+../src/axi4_to_axi4_stream.sv
+../src/frame_rd_ctrl.sv
+../src/frame_wr_ctrl.sv
+../src/rst_sync.sv
+../src/stb_cdc.sv
+../src/frame_buffer.sv
 ./tb_frame_buffer.sv

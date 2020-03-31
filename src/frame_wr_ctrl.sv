@@ -4,17 +4,15 @@ module frame_wr_ctrl #(
   parameter int FRAME_RES_Y    = 1080,
   parameter int FRAME_RES_X    = 1920,
   parameter int ADDR_WIDTH     = 32,
-  parameter int PKT_SIZE_WIDTH = $clog2( FRAME_RES_X )
+  parameter int PKT_SIZE_WIDTH = $clog2( FRAME_RES_X ) + 3
 )(
-  input                           clk_i,
-  input                           rst_i,
-  input  [PKT_SIZE_WIDTH - 1 : 0] line_size_i,
-  axi4_stream_if.slave            video_i,
-  axi4_if.master                  mem_wr,
-  input                           rd_done_i,
-  output                          rd_done_ack_o,
-  output                          wr_done_o,
-  input                           wr_done_ack_i
+  input                       clk_i,
+  input                       rst_i,
+  input  [PKT_SIZE_WIDTH : 0] line_size_i,
+  axi4_stream_if.slave        video_i,
+  axi4_if.master              mem_wr,
+  input                       rd_done_stb_i,
+  output logic                wr_done_stb_o
 );
 
 localparam int WORDS_PER_LINE        = FRAME_RES_X % 4 ? FRAME_RES_X / 4 + 1 : FRAME_RES_X / 4;
@@ -29,20 +27,15 @@ localparam int LINE_CNT_WIDTH        = $clog2( FRAME_RES_Y ) + 1;
 logic [ADDR_WIDTH - 1 : 0]      mem_addr;
 logic [ADDR_WIDTH - 1 : 0]      next_line_addr;
 logic [ADDR_WIDTH - 1 : 0]      next_frame_addr;
-logic [PKT_SIZE_WIDTH - 1 : 0]  line_size_lock;
+logic [PKT_SIZE_WIDTH : 0]      line_size_lock;
 logic                           tfirst;
 logic                           rx_handshake;
 logic                           ignore_frame;
 logic [FRAME_CNT_WIDTH - 1 : 0] frame_cnt;
 logic [LINE_CNT_WIDTH - 1 : 0]  line_cnt;
 logic                           frame_end;
-logic                           wr_done_ack_d1;
-logic                           wr_done_ack_posedge;
-logic                           rd_done_d1;
-logic                           rd_done_posedge;
-logic                           rd_done_negedge;
 
-assign rx_handshake = pkt_i.tvalid && pkt_i.tready;
+assign rx_handshake = video_i.tvalid && video_i.tready;
 
 axi4_stream_if #(
   .TDATA_WIDTH ( 64     ),
@@ -65,29 +58,29 @@ always_ff @( posedge clk_i, posedge rst_i )
       pkt_i_d1.tuser  <= 1'b0;
       pkt_i_d1.tdest  <= 1'b0;
       pkt_i_d1.tid    <= 1'b0;
-      line_size_lock  <= PKT_SIZE_WIDTH'( 0 );
+      line_size_lock  <= ( PKT_SIZE_WIDTH + 1 )'( 0 );
     end
   else
     begin
-      pkt_i_d1.tdata  <= pkt_i.tdata; 
-      pkt_i_d1.tstrb  <= pkt_i.tstrb; 
-      pkt_i_d1.tkeep  <= pkt_i.tkeep; 
-      pkt_i_d1.tlast  <= pkt_i.tlast; 
-      pkt_i_d1.tvalid <= pkt_i.tvalid && !ignore_frame; 
-      pkt_i_d1.tuser  <= pkt_i.tuser; 
-      pkt_i_d1.tdest  <= pkt_i.tdest; 
-      pkt_i_d1.tid    <= pkt_i.tid; 
+      pkt_i_d1.tdata  <= video_i.tdata; 
+      pkt_i_d1.tstrb  <= video_i.tstrb; 
+      pkt_i_d1.tkeep  <= video_i.tkeep; 
+      pkt_i_d1.tlast  <= video_i.tlast; 
+      pkt_i_d1.tvalid <= video_i.tvalid && !ignore_frame; 
+      pkt_i_d1.tuser  <= video_i.tuser; 
+      pkt_i_d1.tdest  <= video_i.tdest; 
+      pkt_i_d1.tid    <= video_i.tid; 
       line_size_lock  <= line_size_i;
     end
 
-assign pkt_i.tready = pkt_i_d1.tready || !pkt_i_d1.tvalid;
+assign video_i.tready = pkt_i_d1.tready || !pkt_i_d1.tvalid;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     tfirst <= 1'b1;
   else
     if( rx_handshake )
-      if( pkt_i.tlast )
+      if( video_i.tlast )
         tfirst <= 1'b1;
       else
         tfirst <= 1'b0;
@@ -97,17 +90,17 @@ always_ff @( posedge clk_i, posedge rst_i )
     mem_addr <= ADDR_WIDTH'( START_ADDR );
   else
     if( rx_handshake )
-      if( pkt_i.tuser )
+      if( video_i.tuser )
         mem_addr <= next_frame_addr;
       else
-        if( pkt_i.tlast )
+        if( video_i.tlast )
           mem_addr <= next_line_addr;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     next_frame_addr <= ADDR_WIDTH'( START_ADDR );
   else
-    if( rx_handshake && pkt_i.tuser )
+    if( rx_handshake && video_i.tuser )
       if( next_line_addr == ADDR_WIDTH'( LAST_FRAME_START_ADDR ) )
         next_frame_addr <= ADDR_WIDTH'( START_ADDR );
       else
@@ -118,10 +111,10 @@ always_ff @( posedge clk_i, posedge rst_i )
     next_line_addr <= ADDR_WIDTH'( START_ADDR );
   else
     if( rx_handshake )
-      if( pkt_i.tuser )
+      if( video_i.tuser )
         next_line_addr <= next_frame_addr + ADDR_WIDTH'( BYTES_PER_LINE );
       else
-        if( pkt_i.tlast )
+        if( video_i.tlast )
           next_line_addr <= next_line_addr + ADDR_WIDTH'( BYTES_PER_LINE );
 
 always_ff @( posedge clk_i, posedge rst_i )
@@ -129,22 +122,22 @@ always_ff @( posedge clk_i, posedge rst_i )
     line_cnt <= LINE_CNT_WIDTH'( 0 );
   else
     if( rx_handshake )
-      if( pkt_i.tuser )
+      if( video_i.tuser )
         line_cnt <= LINE_CNT_WIDTH'( 0 );
       else
-        if( pkt_i.tlast && line_cnt < LINE_CNT_WIDTH'( FRAME_RES_Y ) )
+        if( video_i.tlast && line_cnt < LINE_CNT_WIDTH'( FRAME_RES_Y ) )
           line_cnt <= line_cnt + 1'b1;
 
-assign frame_end = rx_handshake && pkt_i.tuser && line_cnt > LINE_CNT_WIDTH'( 0 );
+assign frame_end = rx_handshake && video_i.tuser && line_cnt > LINE_CNT_WIDTH'( 0 );
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     frame_cnt <= FRAME_CNT_WIDTH'( 0 );
   else
-    if( frame_end && !rd_done_posedge && frame_cnt <= FRAME_CNT_WIDTH'( FRAMES_AMOUNT ) )
+    if( frame_end && !rd_done_stb_i && frame_cnt <= FRAME_CNT_WIDTH'( FRAMES_AMOUNT ) )
       frame_cnt <= frame_cnt + 1'b1;
     else
-      if( !frame_end && rd_done_posedge && frame_cnt > FRAME_CNT_WIDTH'( 1 ) )
+      if( !frame_end && rd_done_stb_i && frame_cnt > FRAME_CNT_WIDTH'( 1 ) )
         frame_cnt <= frame_cnt - 1'b1;
 
 assign ignore_frame = line_cnt == LINE_CNT_WIDTH'( FRAME_RES_Y ) || frame_cnt == FRAME_CNT_WIDTH'( FRAMES_AMOUNT );
@@ -162,41 +155,6 @@ axi4_stream_to_axi4 #(
   .mem_o          ( mem_wr         )
 );
 
-always_ff @( posedge clk_i, posedge rst_i )
-  if( rst_i )
-    wr_done_o <= 1'b0;
-  else
-    if( frame_end && frame_cnt <= FRAME_CNT_WIDTH'( FRAMES_AMOUNT ) )
-      wr_done_o <= 1'b1;
-    else
-      if( wr_done_ack_posedge )
-        wr_done_o <= 1'b0;
-
-always_ff @( posedge clk_i, posedge rst_i )
-  if( rst_i )
-    wr_done_ack_d1 <= 1'b0;
-  else
-    wr_done_ack_d1 <= wr_done_ack_i;
-
-assign wr_done_ack_posedge = wr_done_ack_i && !wr_done_ack_d1;
-
-always_ff @( posedge clk_i, posedge rst_i )
-  if( rst_i )
-    rd_done_d1 <= 1'b0;
-  else
-    rd_done_d1 <= rd_done_i;
-
-assign rd_done_posedge = rd_done_i && !rd_done_d1;
-assign rd_done_negedge = !rd_done_i && rd_done_d1;
-
-always_ff @( posedge clk_i, posedge rst_i )
-  if( rst_i )
-    rd_done_ack_o <= 1'b0;
-  else
-    if( rd_done_posedge )
-      rd_done_ack_o <= 1'b1;
-    else
-      if( rd_done_negedge )
-        rd_done_ack_o <= 1'b0;
+assign wr_done_stb_o = frame_end && frame_cnt <= FRAME_CNT_WIDTH'( FRAMES_AMOUNT );
 
 endmodule

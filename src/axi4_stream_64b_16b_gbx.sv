@@ -15,6 +15,7 @@ logic [3 : 0][1 : 0]  tkeep_buf;
 logic                 tuser_buf;
 logic                 tdest_buf;
 logic                 tid_buf;
+logic                 tlast_buf;
 logic                 word_lock;
 logic [1 : 0]         syms_in_rx_w, syms_in_rx_w_lock;
 
@@ -31,6 +32,7 @@ always_ff @( posedge clk_i, posedge rst_i )
       tuser_buf <= 1'b0;
       tdest_buf <= 1'b0;
       tid_buf   <= 1'b0;
+      tlast_buf <= 1'b0;
     end
   else
     if( rx_handshake )
@@ -41,11 +43,12 @@ always_ff @( posedge clk_i, posedge rst_i )
         tuser_buf <= pkt_i.tuser;
         tdest_buf <= pkt_i.tdest;
         tid_buf   <= pkt_i.tid;
+        tlast_buf <= pkt_i.tlast;
       end
 
 always_comb
   begin
-    syms_in_rx_w = 2'd;
+    syms_in_rx_w = 2'd0;
     for( int i = 1; i < 4; i++ )
       if( pkt_i.tkeep[i] )
         syms_in_rx_w = syms_in_rx_w + 1'b1;

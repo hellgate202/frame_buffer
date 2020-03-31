@@ -8,11 +8,11 @@ module axi4_to_axi4_stream #(
   parameter int TUSER_WIDTH        = 1,
   parameter int TDEST_WIDTH        = 1,
   parameter int MAX_PKT_SIZE_B     = 2048,
-  parameter int MAX_PKT_SIZE_WIDTH = $clog2( MAX_PKT_SIZE_B )
+  parameter int MAX_PKT_SIZE_WIDTH = $clog2( MAX_PKT_SIZE_B * 4 )
 )(
   input                              clk_i,
   input                              rst_i,
-  input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size_i,
+  input [MAX_PKT_SIZE_WIDTH - 1: 0]  pkt_size_i,
   input [ADDR_WIDTH - 1 : 0]         addr_i,
   input                              rd_stb_i,
   axi4_stream_if.master              pkt_o,

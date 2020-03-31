@@ -1,163 +1,116 @@
-`include "../lib/axi4_lib/src/class/AXI4StreamMaster.sv"
+`include "../lib/axi4_lib/src/class/AXI4StreamVideoSource.sv"
 `include "../lib/axi4_lib/src/class/AXI4StreamSlave.sv"
 `include "../lib/axi4_lib/src/class/AXI4MultiportMemory.sv"
 
 module tb_frame_buffer;
 
-parameter int ADDR_WIDTH    = 32;
-parameter int DATA_WIDTH    = 64;
-parameter int RANDOM_TVALID = 1;
-parameter int RANDOM_TREADY = 1;
-parameter int VERBOSE       = 0;
-parameter int CLK_T         = 16000;
+parameter int    CLK_T       = 13468;
+parameter int    FRAME_RES_X = 1920;
+parameter int    FRAME_RES_Y = 1080;
+parameter int    TOTAL_X     = 2200;
+parameter int    TOTAL_Y     = 1125;
+parameter int    PX_WIDTH    = 10;
+parameter string FILE_PATH = "./img.hex";
 
-typedef bit [7 : 0] pkt_q [$];
+bit clk;
+bit rst;
 
-bit          clk;
-bit          rst;
-bit [31 : 0] addr;
-bit [13 : 0] pkt_size;
-bit          rd_stb;
-
-pkt_q tx_pkt;
-
-mailbox rx_data_mbx = new();
-
-axi4_stream_if #(
-  .TDATA_WIDTH ( DATA_WIDTH ),
-  .TID_WIDTH   ( 1          ),
-  .TDEST_WIDTH ( 1          ),
-  .TUSER_WIDTH ( 1          )
-) pkt_i (
-  .aclk        ( clk        ),
-  .aresetn     ( !rst       )
-);
-
-axi4_stream_if #(
-  .TDATA_WIDTH ( DATA_WIDTH ),
-  .TID_WIDTH   ( 1          ),
-  .TDEST_WIDTH ( 1          ),
-  .TUSER_WIDTH ( 1          )
-) pkt_o (
-  .aclk        ( clk        ),
-  .aresetn     ( !rst       )
-);
-
-AXI4StreamMaster #(
-  .TDATA_WIDTH    ( DATA_WIDTH     ),
-  .TID_WIDTH      ( 1              ),
-  .TDEST_WIDTH    ( 1              ),
-  .TUSER_WIDTH    ( 1              ),
-  .RANDOM_TVALID  ( RANDOM_TVALID  ),
-  .VERBOSE        ( VERBOSE        ),
-  .WATCHDOG_EN    ( 1'b1           ),
-  .WATCHDOG_LIMIT ( 200            )
-) pkt_sender;
-
-AXI4StreamSlave #(
-  .TDATA_WIDTH    ( DATA_WIDTH     ),
-  .TID_WIDTH      ( 1              ),
-  .TDEST_WIDTH    ( 1              ),
-  .TUSER_WIDTH    ( 1              ),
-  .RANDOM_TREADY  ( RANDOM_TREADY  ),
-  .VERBOSE        ( VERBOSE        ),
-  .WATCHDOG_EN    ( 1'b1           ),
-  .WATCHDOG_LIMIT ( 200            )
-) pkt_receiver;
-
-axi4_if #(
-  .DATA_WIDTH ( DATA_WIDTH ),
-  .ADDR_WIDTH ( ADDR_WIDTH )
-) mem[1 : 0] (
-  .aclk       ( clk        ),
-  .aresetn    ( !rst       )
-);
-
-AXI4MultiportMemory #(
-  .DATA_WIDTH    ( DATA_WIDTH ),
-  .ADDR_WIDTH    ( ADDR_WIDTH ),
-  .ID_WIDTH      ( 1          ),
-  .RANDOM_WREADY ( 1          ),
-  .RANDOM_RVALID ( 1          )
-) memory;
-
-task automatic clk_gen();
-
+task automatic gen_clk();
   forever
     begin
       #( CLK_T / 2 );
       clk = !clk;
     end
-
 endtask
 
 task automatic apply_rst();
-
-  @( posedge clk );
   rst = 1'b1;
   @( posedge clk );
   rst = 1'b0;
-
 endtask
 
-task automatic send_pkt( int size, int start_addr );
-  
-  bit [7 : 0] pkt [$];
-  for( int i = 0; i < size; i++ )
-    pkt.push_back( i % 256 );
-  addr     = start_addr;
-  pkt_size = size;
-  pkt_sender.tx_data( pkt );
+AXI4StreamVideoSource #(
+  .PX_WIDTH    ( PX_WIDTH    ),
+  .FRAME_RES_X ( FRAME_RES_X ),
+  .FRAME_RES_Y ( FRAME_RES_Y ),
+  .TOTAL_X     ( TOTAL_X     ),
+  .TOTAL_Y     ( TOTAL_Y     ),
+  .FILE_PATH   ( FILE_PATH   )
+) video_gen;
 
-endtask
-
-axi4_stream_to_axi4 #(
-  .DATA_WIDTH     ( DATA_WIDTH ),
-  .ADDR_WIDTH     ( ADDR_WIDTH ),
-  .MAX_PKT_SIZE_B ( 9600       )
-) DUT_0 (
-  .clk_i          ( clk        ),
-  .rst_i          ( rst        ),
-  .pkt_size_i     ( pkt_size   ),
-  .addr_i         ( addr       ),
-  .pkt_i          ( pkt_i      ),
-  .mem_o          ( mem[0]     )
+axi4_stream_if #(
+  .TDATA_WIDTH ( 16   ),
+  .TID_WIDTH   ( 1    ),
+  .TDEST_WIDTH ( 1    ),
+  .TUSER_WIDTH ( 1    )
+) video_i (
+  .aclk        ( clk  ),
+  .aresetn     ( !rst )
 );
 
-axi4_to_axi4_stream #(
-  .DATA_WIDTH     ( DATA_WIDTH ),
-  .ADDR_WIDTH     ( ADDR_WIDTH ),
-  .MAX_PKT_SIZE_B ( 9600       )
-) DUT_1 (
-  .clk_i          ( clk        ),
-  .rst_i          ( rst        ),
-  .pkt_size_i     ( pkt_size   ),
-  .addr_i         ( addr       ),
-  .rd_stb         ( rd_stb     ),
-  .pkt_o          ( pkt_o      ),
-  .mem_o          ( mem[1]     )
+axi4_stream_if #(
+  .TDATA_WIDTH ( 16   ),
+  .TID_WIDTH   ( 1    ),
+  .TDEST_WIDTH ( 1    ),
+  .TUSER_WIDTH ( 1    )
+) video_o (
+  .aclk        ( clk  ),
+  .aresetn     ( !rst )
+);
+
+axi4_if #(
+  .DATA_WIDTH   ( 64   ),
+  .ADDR_WIDTH   ( 32   ),
+  .ID_WIDTH     ( 1    ),
+  .AWUSER_WIDTH ( 1    ),
+  .WUSER_WIDTH  ( 1    ),
+  .BUSER_WIDTH  ( 1    ),
+  .ARUSER_WIDTH ( 1    ),
+  .RUSER_WIDTH  ( 1    )
+) mem_if [1 : 0] (
+  .aclk         ( clk  ),
+  .aresetn      ( !rst )
+);
+
+AXI4MultiportMemory #(
+  .DATA_WIDTH   ( 64 ),
+  .ADDR_WIDTH   ( 32 ),
+  .ID_WIDTH     ( 1  ),
+  .AWUSER_WIDTH ( 1  ),
+  .WUSER_WIDTH  ( 1  ),
+  .BUSER_WIDTH  ( 1  ),
+  .ARUSER_WIDTH ( 1  ),
+  .RUSER_WIDTH  ( 1  )
+) ram;
+
+frame_buffer #(
+  .START_ADDR    ( 32'h3fff0000 ),
+  .FRAMES_AMOUNT ( 3            ),
+  .FRAME_RES_X   ( FRAME_RES_X  ),
+  .FRAME_RES_Y   ( FRAME_RES_Y  )
+) DUT (
+  .wr_clk_i      ( clk          ),
+  .wr_rst_i      ( rst          ),
+  .rd_clk_i      ( clk          ),
+  .rd_rst_i      ( rst          ),
+  .video_i       ( video_i      ),
+  .video_o       ( video_o      ),
+  .mem_wr        ( mem_if[0]    ),
+  .mem_rd        ( mem_if[1]    )
 );
 
 initial
   begin
-    pkt_sender   = new( .axi4_stream_if_v ( pkt_i ) );
-    pkt_receiver = new( .axi4_stream_if_v ( pkt_o ),
-                        .rx_data_mbx      ( rx_data_mbx ) );
-    memory       = new( .axi4_if_v ( mem ) );
+    video_gen = new( video_i );
+    ram       = new( mem_if  );
     fork
-      clk_gen();
+      gen_clk();
+      apply_rst();
     join_none
-    apply_rst();
     @( posedge clk );
-    send_pkt( 2050, 32'h00fb100 );
-    rd_stb = 1'b1;
-    @( posedge clk );
-    rd_stb = 1'b0;
-    while( !pkt_o.tvalid || !pkt_o.tready || !pkt_o.tlast )
+    video_gen.run();
+    repeat( 10000 )
       @( posedge clk );
-    repeat( 100 )
-      @( posedge clk );
-    $display( "Everything is fine." );
     $stop();
   end
 

@@ -6,14 +6,14 @@ module axi4_stream_to_axi4 #(
   parameter int WUSER_WIDTH        = 1,
   parameter int ARUSER_WIDTH       = 1,
   parameter int MAX_PKT_SIZE_B     = 2048,
-  parameter int MAX_PKT_SIZE_WIDTH = $clog2( MAX_PKT_SIZE_B )
+  parameter int MAX_PKT_SIZE_WIDTH = $clog2( MAX_PKT_SIZE_B * 4 )
 )(
-  input                              clk_i,
-  input                              rst_i,
-  input [MAX_PKT_SIZE_WIDTH - 1 : 0] pkt_size_i,
-  input [ADDR_WIDTH - 1 : 0]         addr_i,
-  axi4_stream_if.slave               pkt_i,
-  axi4_if.master                     mem_o
+  input                          clk_i,
+  input                          rst_i,
+  input [MAX_PKT_SIZE_WIDTH : 0] pkt_size_i,
+  input [ADDR_WIDTH - 1 : 0]     addr_i,
+  axi4_stream_if.slave           pkt_i,
+  axi4_if.master                 mem_o
 );
 
 localparam int DATA_WIDTH_B   = DATA_WIDTH / 8;
