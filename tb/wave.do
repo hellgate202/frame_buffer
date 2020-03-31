@@ -1,6 +1,167 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-WaveRestoreCursors {{Cursor 1} {6734 ps} 0}
+add wave -noupdate -divider video_i
+add wave -noupdate /tb_frame_buffer/DUT/video_i/aclk
+add wave -noupdate /tb_frame_buffer/DUT/video_i/aresetn
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tvalid
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tready
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tdata
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tstrb
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tkeep
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tlast
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tid
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tdest
+add wave -noupdate /tb_frame_buffer/DUT/video_i/tuser
+add wave -noupdate -divider video_i_64
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/aclk
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/aresetn
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tvalid
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tready
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tdata
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tstrb
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tkeep
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tlast
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tid
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tdest
+add wave -noupdate /tb_frame_buffer/DUT/video_64_i/tuser
+add wave -noupdate -divider filtered_video
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/aclk
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/aresetn
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tvalid
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tready
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tdata
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tstrb
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tkeep
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tlast
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tid
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tdest
+add wave -noupdate /tb_frame_buffer/DUT/filtered_video/tuser
+add wave -noupdate -divider frame_wr_ctrl
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/clk_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/rst_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/line_size_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/rd_done_stb_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_done_stb_o
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/mem_addr
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/next_line_addr
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/next_frame_addr
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/line_size_lock
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/tfirst
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/rx_handshake
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/ignore_frame
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/frame_cnt
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/line_cnt
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/frame_end
+add wave -noupdate -divider axi4_stream_to_axi4
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/clk_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/rst_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/pkt_size_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/addr_i
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/tfirst
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/rx_handshake
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/w_handshake
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/aw_handshake
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/pkt_words_left
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/burst_words_left
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/cur_addr
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/was_aw_handshake
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/state
+add wave -noupdate /tb_frame_buffer/DUT/wr_ctrl/wr_dma/next_state
+add wave -noupdate -divider mem_wr
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/aclk
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/aresetn
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awaddr
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awlen
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awsize
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awburst
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awlock
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awcache
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awprot
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awqos
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awregion
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awuser
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awvalid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/awready
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wdata
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wstrb
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wlast
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wuser
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wvalid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/wready
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/bid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/bresp
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/buser
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/bvalid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/bready
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/araddr
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arlen
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arsize
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arburst
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arlock
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arcache
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arprot
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arqos
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arregion
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/aruser
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arvalid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/arready
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rdata
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rresp
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rlast
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/ruser
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rvalid
+add wave -noupdate /tb_frame_buffer/DUT/mem_wr/rready
+add wave -noupdate -divider rd_ctrl
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/clk_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rst_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_done_stb_o
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/wr_done_stb_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/frame_cnt
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/mem_addr
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/cur_frame_addr
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/next_frame_addr
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/last_line_addr
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/lines_in_fifo
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_req
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/new_addr_req
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/frame_read_finish
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/frame_read_finish_d1
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/new_frame_avail
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/read_allow
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/make_decision
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/ready_to_read
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/fifo_empty
+add wave -noupdate -divider rd_dma
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/clk_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/rst_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_size_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/addr_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/rd_stb_i
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/r_handshake
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/ar_handshake
+add wave -noupdate -radix unsigned /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_words_left
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/burst_words_left
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/cur_addr
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/was_ar_handshake
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/tlast_tstrb
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/state
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/next_state
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/aclk
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/aresetn
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tvalid
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tready
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tdata
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tstrb
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tkeep
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tlast
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tid
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tdest
+add wave -noupdate /tb_frame_buffer/DUT/rd_ctrl/rd_dma/pkt_o/tuser
+TreeUpdate [SetDefaultTree]
+WaveRestoreCursors {{Cursor 1} {6527398 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 343
 configure wave -valuecolwidth 100
@@ -16,4 +177,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {141421071 ps}
+WaveRestoreZoom {0 ps} {3673985215 ps}

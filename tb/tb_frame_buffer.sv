@@ -99,6 +99,8 @@ frame_buffer #(
   .mem_rd        ( mem_if[1]    )
 );
 
+assign video_o.tready = 1'b1;
+
 initial
   begin
     video_gen = new( video_i );
@@ -109,8 +111,13 @@ initial
     join_none
     @( posedge clk );
     video_gen.run();
-    repeat( 10000 )
-      @( posedge clk );
+    repeat( 3 )
+      begin
+        while( !DUT.wr_done_stb_wr_clk )
+          @( posedge clk );
+        repeat( 2200 * 1125 + 100000 )
+          @( posedge clk );
+      end
     $stop();
   end
 

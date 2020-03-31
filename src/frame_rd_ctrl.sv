@@ -166,13 +166,14 @@ axi4_stream_fifo #(
   .pkt_o         ( video_n_tuser )
 );
 
-assign video_o.tdata  = video_n_tuser.tdata;
-assign video_o.tvalid = video_n_tuser.tvalid;
-assign video_o.tstrb  = video_n_tuser.tstrb;
-assign video_o.tkeep  = video_n_tuser.tkeep;
-assign video_o.tlast  = video_n_tuser.tlast;
-assign video_o.tdest  = video_n_tuser.tdest;
-assign video_o.tid    = video_n_tuser.tid;
+assign video_o.tdata        = video_n_tuser.tdata;
+assign video_o.tvalid       = video_n_tuser.tvalid;
+assign video_o.tstrb        = video_n_tuser.tstrb;
+assign video_o.tkeep        = video_n_tuser.tkeep;
+assign video_o.tlast        = video_n_tuser.tlast;
+assign video_o.tdest        = video_n_tuser.tdest;
+assign video_o.tid          = video_n_tuser.tid;
+assign video_n_tuser.tready = video_o.tready;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )

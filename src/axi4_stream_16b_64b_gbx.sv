@@ -9,9 +9,20 @@ module axi4_stream_16b_64b_gbx
 logic         rx_handshake;
 logic         tx_handshake;
 logic [1 : 0] ins_pos;
+logic         tfirst;
 
 assign rx_handshake = pkt_i.tvalid && pkt_i.tready;
 assign tx_handshake = pkt_o.tvalid && pkt_o.tready;
+
+always_ff @( posedge clk_i, posedge rst_i )
+  if( rst_i )
+    tfirst <= 1'b1;
+  else
+    if( rx_handshake )
+      if( pkt_i.tlast )
+        tfirst <= 1'b1;
+      else
+        tfirst <= 1'b0;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
@@ -66,12 +77,21 @@ always_ff @( posedge clk_i, posedge rst_i )
       pkt_o.tlast <= 1'b0;
     end
   else
-    if( rx_handshake )
+    if( rx_handshake  )
       begin
-        pkt_o.tuser <= pkt_i.tuser;
         pkt_o.tdest <= pkt_i.tdest;
         pkt_o.tid   <= pkt_i.tid;
-        pkt_o.tlast <= pkt_o.tlast;
-      end
+        pkt_o.tlast <= pkt_i.tlast;
+      end        
 
+always_ff @( posedge clk_i, posedge rst_i )
+  if( rst_i )
+    pkt_o.tuser <= 1'b0;
+  else
+    if( rx_handshake && tfirst )
+      pkt_o.tuser <= pkt_i.tuser;
+    else
+      if( tx_handshake )
+        pkt_o.tuser <= 1'b0;
+                 
 endmodule

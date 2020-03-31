@@ -6,9 +6,9 @@ module stb_cdc
   output logic stb_o
 );
 
-logic stb_i_lock;
-logic lock_rst;
-logic [1 : 0] stb_sync;
+logic         stb_i_lock = 1'b0;
+logic         lock_rst;
+logic [1 : 0] stb_sync = 2'd0;
 
 always_ff @( posedge stb_i_clk, posedge lock_rst )
   if( lock_rst )

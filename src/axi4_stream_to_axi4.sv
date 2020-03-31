@@ -119,7 +119,7 @@ always_ff @( posedge clk_i, posedge rst_i )
     if( state == CALC_BURST_S )
       if( pkt_words_left > MAX_PKT_SIZE_WIDTH'( 256 ) )
         burst_words_left <= 8'd255;
-      else
+      else 
         burst_words_left <= pkt_words_left[7 : 0] - 1'b1;
     else
       if( w_handshake )
