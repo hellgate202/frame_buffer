@@ -29,7 +29,6 @@ logic [ADDR_WIDTH - 1 : 0]      mem_addr;
 logic [ADDR_WIDTH - 1 : 0]      next_line_addr;
 logic [ADDR_WIDTH - 1 : 0]      next_frame_addr;
 logic [PKT_SIZE_WIDTH : 0]      line_size_lock;
-logic                           tfirst;
 logic                           rx_handshake;
 logic                           ignore_frame;
 logic [FRAME_CNT_WIDTH - 1 : 0] frame_cnt;
@@ -82,16 +81,6 @@ always_ff @( posedge clk_i, posedge rst_i )
 assign pkt_i_d1.tvalid = tvalid_lock && !ignore_frame;
 
 assign video_i.tready = pkt_i_d1.tready || !pkt_i_d1.tvalid;
-
-always_ff @( posedge clk_i, posedge rst_i )
-  if( rst_i )
-    tfirst <= 1'b1;
-  else
-    if( rx_handshake )
-      if( video_i.tlast )
-        tfirst <= 1'b1;
-      else
-        tfirst <= 1'b0;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )

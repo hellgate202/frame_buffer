@@ -71,7 +71,6 @@ always_ff @( posedge clk_i, posedge rst_i )
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     begin
-      pkt_o.tuser <= 1'b0;
       pkt_o.tdest <= 1'b0;
       pkt_o.tid   <= 1'b0;
       pkt_o.tlast <= 1'b0;

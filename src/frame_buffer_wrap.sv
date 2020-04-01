@@ -1,7 +1,7 @@
 module frame_buffer_wrap #(
   parameter int START_ADDR    = 0,
   parameter int FRAMES_AMOUNT = 3,
-  parameter int FRAME_RES_Y  = 1080,
+  parameter int FRAME_RES_Y   = 1080,
   parameter int FRAME_RES_X   = 1920
 )(
   input           wr_clk_i,
@@ -19,15 +19,15 @@ module frame_buffer_wrap #(
   input           video_i_tdest,
   input           video_i_tuser,
   // Output video stream
-  output          video_i_tvalid,
-  input           video_i_tready,
-  output [15 : 0] video_i_tdata,
-  output [1 : 0]  video_i_tstrb,
-  output [1 : 0]  video_i_tkeep,
-  output          video_i_tlast,
-  output          video_i_tid,
-  output          video_i_tdest,
-  output          video_i_tuser,
+  output          video_o_tvalid,
+  input           video_o_tready,
+  output [15 : 0] video_o_tdata,
+  output [1 : 0]  video_o_tstrb,
+  output [1 : 0]  video_o_tkeep,
+  output          video_o_tlast,
+  output          video_o_tid,
+  output          video_o_tdest,
+  output          video_o_tuser,
   // Write memory port 
   output          mem_wr_awid,
   output [31 : 0] mem_wr_awaddr,
@@ -117,21 +117,21 @@ module frame_buffer_wrap #(
   input           mem_rd_rlast,
   input           mem_rd_ruser,
   input           mem_rd_rvalid,
-  output          mem_rd_rready,
+  output          mem_rd_rready
 );
 
 axi4_if #(
-  .DATA_WIDTH   ( 64      ),
-  .ADDR_WIDTH   ( 32      ),
-  .ID_WIDTH     ( 1       ),
-  .AWUSER_WIDTH ( 1       ),
-  .WUSER_WIDTH  ( 1       ),
-  .BUSER_WIDTH  ( 1       ),
-  .ARUSER_WIDTH ( 1       ),
-  .RUSER_WIDTH  ( 1       )
+  .DATA_WIDTH   ( 64        ),
+  .ADDR_WIDTH   ( 32        ),
+  .ID_WIDTH     ( 1         ),
+  .AWUSER_WIDTH ( 1         ),
+  .WUSER_WIDTH  ( 1         ),
+  .BUSER_WIDTH  ( 1         ),
+  .ARUSER_WIDTH ( 1         ),
+  .RUSER_WIDTH  ( 1         )
 ) mem_wr (
-  .aclk         ( wr_clk  ),
-  .aresetn      ( !wr_rst )
+  .aclk         ( wr_clk_i  ),
+  .aresetn      ( !wr_rst_i )
 );
 
 assign mem_wr.awid     = mem_wr_awid;
@@ -180,17 +180,17 @@ assign mem_wr_rvalid   = mem_wr.rvalid;
 assign mem_wr.rready   = mem_wr_rready;
 
 axi4_if #(
-  .DATA_WIDTH   ( 64      ),
-  .ADDR_WIDTH   ( 32      ),
-  .ID_WIDTH     ( 1       ),
-  .AWUSER_WIDTH ( 1       ),
-  .WUSER_WIDTH  ( 1       ),
-  .BUSER_WIDTH  ( 1       ),
-  .ARUSER_WIDTH ( 1       ),
-  .RUSER_WIDTH  ( 1       )
+  .DATA_WIDTH   ( 64        ),
+  .ADDR_WIDTH   ( 32        ),
+  .ID_WIDTH     ( 1         ),
+  .AWUSER_WIDTH ( 1         ),
+  .WUSER_WIDTH  ( 1         ),
+  .BUSER_WIDTH  ( 1         ),
+  .ARUSER_WIDTH ( 1         ),
+  .RUSER_WIDTH  ( 1         )
 ) mem_rd (
-  .aclk         ( rd_clk  ),
-  .aresetn      ( !rd_rst )
+  .aclk         ( rd_clk_i  ),
+  .aresetn      ( !rd_rst_i )
 );
 
 assign mem_rd.awid     = mem_rd_awid;
@@ -239,13 +239,13 @@ assign mem_rd_rvalid   = mem_rd.rvalid;
 assign mem_rd.rready   = mem_rd_rready;
 
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16      ),
-  .TID_WIDTH   ( 1       ),
-  .TDEST_WIDTH ( 1       ),
-  .TUSER_WIDTH ( 1       )
+  .TDATA_WIDTH ( 16        ),
+  .TID_WIDTH   ( 1         ),
+  .TDEST_WIDTH ( 1         ),
+  .TUSER_WIDTH ( 1         )
 ) video_i (
-  .aclk        ( rd_clk  ),
-  .aresetn     ( !rd_rst )
+  .aclk        ( wr_clk_i  ),
+  .aresetn     ( !wr_rst_i )
 );
 
 assign video_i.tvalid = video_i_tvalid;
@@ -259,13 +259,13 @@ assign video_i.tlast  = video_i_tlast;
 assign video_i_tready = video_i.tready;
 
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16      ),
-  .TID_WIDTH   ( 1       ),
-  .TDEST_WIDTH ( 1       ),
-  .TUSER_WIDTH ( 1       )
+  .TDATA_WIDTH ( 16        ),
+  .TID_WIDTH   ( 1         ),
+  .TDEST_WIDTH ( 1         ),
+  .TUSER_WIDTH ( 1         )
 ) video_o (
-  .aclk        ( rd_clk  ),
-  .aresetn     ( !rd_rst )
+  .aclk        ( rd_clk_i  ),
+  .aresetn     ( !rd_rst_i )
 );
 
 assign video_o_tvalid = video_o.tvalid;
