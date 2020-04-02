@@ -38,8 +38,8 @@ axi4_stream_if #(
   .TDEST_WIDTH ( 1         ),
   .TUSER_WIDTH ( 1         )
 ) video_64_o (
-  .aclk        ( wr_clk_i  ),
-  .aresetn     ( !wr_rst_i )
+  .aclk        ( rd_clk_i  ),
+  .aresetn     ( !rd_rst_i )
 );
 
 axi4_stream_16b_64b_gbx video_des
@@ -142,6 +142,28 @@ frame_rd_ctrl #(
   .wr_done_stb_i ( wr_done_stb_rd_clk )
 );
 
+axi4_stream_if #(
+  .TDATA_WIDTH ( 64        ),
+  .TID_WIDTH   ( 1         ),
+  .TDEST_WIDTH ( 1         ),
+  .TUSER_WIDTH ( 1         )
+) video_64_o_d (
+  .aclk        ( rd_clk_i  ),
+  .aresetn     ( !rd_rst_i )
+);
+
+axi4_stream_pipeline #(
+  .TDATA_WIDTH ( 64               ),
+  .TID_WIDTH   ( 1                ),
+  .TDEST_WIDTH ( 1                ),
+  .TUSER_WIDTH ( 1                )
+) video_64_o_pipe (
+  .clk_i       ( rd_clk_i         ),
+  .rst_i       ( rd_rst_i         ),
+  .pkt_i       ( video_64_o       ),
+  .pkt_o       ( video_64_o_d     )
+);
+
 stb_cdc rd_done_stb_cdc
 (
   .stb_i_clk ( rd_clk_i           ),
@@ -152,10 +174,10 @@ stb_cdc rd_done_stb_cdc
 
 axi4_stream_64b_16b_gbx video_ser
 (
-  .clk_i ( rd_clk_i   ),
-  .rst_i ( rd_rst_i   ),
-  .pkt_i ( video_64_o ),
-  .pkt_o ( video_o    )
+  .clk_i ( rd_clk_i     ),
+  .rst_i ( rd_rst_i     ),
+  .pkt_i ( video_64_o_d ),
+  .pkt_o ( video_o      )
 );
 
 endmodule

@@ -2808,6 +2808,10 @@
         <spirit:fileType>systemVerilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
+        <spirit:name>lib/axi4_lib/src/utility/axi4_stream_pipeline.sv</spirit:name>
+        <spirit:fileType>systemVerilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
         <spirit:name>src/axi4_stream_to_axi4.sv</spirit:name>
         <spirit:fileType>systemVerilogSource</spirit:fileType>
       </spirit:file>
@@ -2869,6 +2873,10 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>lib/axi4_lib/src/interface/axi4_stream_if.sv</spirit:name>
+        <spirit:fileType>systemVerilogSource</spirit:fileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>lib/axi4_lib/src/utility/axi4_stream_pipeline.sv</spirit:name>
         <spirit:fileType>systemVerilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
