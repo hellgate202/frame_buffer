@@ -1,5 +1,6 @@
 ../lib/axi4_lib/src/interface/axi4_stream_if.sv
 ../lib/axi4_lib/src/interface/axi4_if.sv
+../lib/axi4_lib/src/utility/axi4_stream_pipeline.sv
 ../ip/dual_port_ram/src/dual_port_ram.sv
 ../lib/fifo_lib/src/sc_fifo.sv
 ../lib/fifo_lib/src/axi4_stream_fifo.sv

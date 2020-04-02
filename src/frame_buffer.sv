@@ -81,6 +81,28 @@ axi4_stream_fifo #(
   .pkt_o         ( filtered_video )
 );
 
+axi4_stream_if #(
+  .TDATA_WIDTH ( 64        ),
+  .TID_WIDTH   ( 1         ),
+  .TDEST_WIDTH ( 1         ),
+  .TUSER_WIDTH ( 1         )
+) filtered_video_d (
+  .aclk        ( wr_clk_i  ),
+  .aresetn     ( !wr_rst_i )
+);
+
+axi4_stream_pipeline #(
+  .TDATA_WIDTH ( 64               ),
+  .TID_WIDTH   ( 1                ),
+  .TDEST_WIDTH ( 1                ),
+  .TUSER_WIDTH ( 1                )
+) filtered_video_pipe (
+  .clk_i       ( wr_clk_i         ),
+  .rst_i       ( wr_rst_i         ),
+  .pkt_i       ( filtered_video   ),
+  .pkt_o       ( filtered_video_d )
+);
+
 frame_wr_ctrl #(
   .START_ADDR    ( START_ADDR         ),
   .FRAMES_AMOUNT ( FRAMES_AMOUNT      ),
@@ -91,7 +113,7 @@ frame_wr_ctrl #(
   .clk_i         ( wr_clk_i           ),
   .rst_i         ( wr_rst_i           ),
   .line_size_i   ( line_size          ),
-  .video_i       ( filtered_video     ),
+  .video_i       ( filtered_video_d   ),
   .mem_wr        ( mem_wr             ),
   .rd_done_stb_i ( rd_done_stb_wr_clk ),
   .wr_done_stb_o ( wr_done_stb_wr_clk )
