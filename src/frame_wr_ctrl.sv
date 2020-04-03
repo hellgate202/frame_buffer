@@ -51,7 +51,8 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     tvalid_lock <= 1'b0;
   else
-    tvalid_lock <= video_i.tvalid;
+    if( video_i.tready )
+      tvalid_lock <= video_i.tvalid;
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
