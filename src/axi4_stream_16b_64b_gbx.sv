@@ -38,7 +38,7 @@ always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
     pkt_o.tvalid <= 1'b0;
   else
-    if( pkt_i.tlast || pkt_i.tvalid && ins_pos == 2'd3 )
+    if( pkt_i.tvalid && ( ins_pos == 2'd3 || pkt_i.tlast ) )
       pkt_o.tvalid <= 1'b1;
     else
       if( pkt_i.tready )
