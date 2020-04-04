@@ -19,7 +19,6 @@ logic                 tlast_buf;
 logic                 word_lock;
 logic [1 : 0]         syms_in_rx_w, syms_in_rx_w_lock;
 
-
 assign rx_handshake = pkt_i.tvalid && pkt_i.tready;
 assign tx_handshake = pkt_o.tvalid && pkt_o.tready;
 
