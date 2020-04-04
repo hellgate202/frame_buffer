@@ -99,20 +99,20 @@ always_ff @( posedge clk_i, posedge rst_i )
     next_frame_addr <= ADDR_WIDTH'( START_ADDR );
   else
     if( rx_handshake && video_i.tuser )
-      if( next_line_addr == ADDR_WIDTH'( LAST_FRAME_START_ADDR ) )
+      if( next_frame_addr == ADDR_WIDTH'( LAST_FRAME_START_ADDR ) )
         next_frame_addr <= ADDR_WIDTH'( START_ADDR );
       else
         next_frame_addr <= next_frame_addr + ADDR_WIDTH'( BYTES_PER_FRAME );
 
 always_ff @( posedge clk_i, posedge rst_i )
   if( rst_i )
-    next_line_addr <= ADDR_WIDTH'( START_ADDR );
+    next_line_addr <= ADDR_WIDTH'( START_ADDR + BYTES_PER_LINE );
   else
     if( rx_handshake )
       if( video_i.tuser )
         next_line_addr <= next_frame_addr + ADDR_WIDTH'( BYTES_PER_LINE );
       else
-        if( video_i.tlast )
+        if( video_i.tlast && !ignore_frame )
           next_line_addr <= next_line_addr + ADDR_WIDTH'( BYTES_PER_LINE );
 
 always_ff @( posedge clk_i, posedge rst_i )
