@@ -4,8 +4,8 @@
 ../ip/dual_port_ram/src/dual_port_ram.sv
 ../lib/fifo_lib/src/sc_fifo.sv
 ../lib/fifo_lib/src/axi4_stream_fifo.sv
-../src/axi4_stream_16b_64b_gbx.sv
-../src/axi4_stream_64b_16b_gbx.sv
+../lib/axi4_lib/src/utility/axi4_stream_multiple_upsizer.sv
+../lib/axi4_lib/src/utility/axi4_stream_multiple_downsizer.sv
 ../src/axi4_stream_to_axi4.sv
 ../src/axi4_to_axi4_stream.sv
 ../src/frame_rd_ctrl.sv

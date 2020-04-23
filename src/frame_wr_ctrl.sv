@@ -4,7 +4,8 @@ module frame_wr_ctrl #(
   parameter int FRAME_RES_Y    = 1080,
   parameter int FRAME_RES_X    = 1920,
   parameter int ADDR_WIDTH     = 32,
-  parameter int PKT_SIZE_WIDTH = $clog2( FRAME_RES_X ) + 3
+  parameter int TDATA_WIDTH    = 16,
+  parameter int PKT_SIZE_WIDTH = $clog2( FRAME_RES_X / ( 64 / TDATA_WIDTH ) * 4 * 8 )
 )(
   input                       clk_i,
   input                       rst_i,
@@ -15,7 +16,10 @@ module frame_wr_ctrl #(
   output logic                wr_done_stb_o
 );
 
-localparam int WORDS_PER_LINE        = FRAME_RES_X % 4 ? FRAME_RES_X / 4 + 1 : FRAME_RES_X / 4;
+localparam int PX_PER_WORD           = 64 / TDATA_WIDTH;
+localparam int WORDS_PER_LINE        = FRAME_RES_X % PX_PER_WORD ? 
+                                       FRAME_RES_X / PX_PER_WORD + 1 : 
+                                       FRAME_RES_X / PX_PER_WORD;
 localparam int WORDS_PER_FRAME       = WORDS_PER_LINE * FRAME_RES_Y;
 localparam int BYTES_PER_LINE        = WORDS_PER_LINE * 8;
 localparam int BYTES_PER_FRAME       = WORDS_PER_FRAME * 8;

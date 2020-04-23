@@ -10,7 +10,8 @@ parameter int    FRAME_RES_X       = 1920;
 parameter int    FRAME_RES_Y       = 1080;
 parameter int    TOTAL_X           = 2200;
 parameter int    TOTAL_Y           = 1125;
-parameter int    PX_WIDTH          = 16;
+parameter int    PX_WIDTH          = 36;
+parameter int    TDATA_WIDTH       = 40;
 parameter string FILE_PATH         = "./img.hex";
 parameter int    GEN_FRAME_RES_X   = 1920;
 parameter int    GEN_FRAME_RES_Y   = 1080;
@@ -18,6 +19,7 @@ parameter int    GEN_FRAME_TOTAL_X = 2200;
 parameter int    GEN_FRAME_TOTAL_Y = 1125;
 parameter int    PX_AMOUNT         = FRAME_RES_X * FRAME_RES_Y;
 parameter int    GEN_PX_AMOUNT     = GEN_FRAME_RES_X * GEN_FRAME_RES_Y;
+parameter int    TDATA_WIDTH_B     = TDATA_WIDTH / 8;
 
 bit wr_clk;
 bit wr_rst;
@@ -74,6 +76,7 @@ task automatic check_rx_video();
 int                                         line_num;
 bit [7 : 0]                                 rx_line [$];
 bit [FRAME_RES_X - 1 : 0][PX_WIDTH - 1 : 0] comp_line;
+bit [TDATA_WIDTH_B - 1 : 0][7 : 0]          comp_word;
 bit [PX_WIDTH - 1 : 0]                      comp_px;
 
 forever
@@ -83,15 +86,22 @@ forever
         rx_video_mbx.get( rx_line );
         for( int x = 0; x < FRAME_RES_X; x++ )
           begin
-            comp_px[7 : 0]            = rx_line.pop_front();
-            comp_px[PX_WIDTH - 1 : 8] = rx_line.pop_front();
-            comp_line[x]              = comp_px;
+            for( int i = 0; i < TDATA_WIDTH_B; i++ )
+              comp_word[i] = rx_line.pop_front();
+            comp_px      = comp_word[PX_WIDTH - 1 : 0];
+            comp_line[x] = comp_px;
           end
         if( comp_line != ref_frame[line_num] )
           begin
-            $display( "oops" );
+            $display( "Wrong line %0d", line_num );
+            $display( "Was: " );
             for( int x = 0; x < FRAME_RES_X; x++ )
-              $display( "0x%0h", comp_line[x] );
+              $write( "0x%0h ", comp_line[x] );
+            $write ( "\n" );
+            $display( "Should: " );
+            for( int x = 0; x < FRAME_RES_X; x++ )
+              $write( "0x%0h ", ref_frame[line_num][x] );
+            $write ( "\n" );
             $stop();
           end
         else
@@ -116,31 +126,31 @@ AXI4StreamVideoSource #(
 ) video_gen;
 
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16      ),
-  .TID_WIDTH   ( 1       ),
-  .TDEST_WIDTH ( 1       ),
-  .TUSER_WIDTH ( 1       )
+  .TDATA_WIDTH ( TDATA_WIDTH ),
+  .TID_WIDTH   ( 1           ),
+  .TDEST_WIDTH ( 1           ),
+  .TUSER_WIDTH ( 1           )
 ) video_i (
   .aclk        ( wr_clk  ),
   .aresetn     ( !wr_rst )
 );
 
 axi4_stream_if #(
-  .TDATA_WIDTH ( 16      ),
-  .TID_WIDTH   ( 1       ),
-  .TDEST_WIDTH ( 1       ),
-  .TUSER_WIDTH ( 1       )
+  .TDATA_WIDTH ( TDATA_WIDTH ),
+  .TID_WIDTH   ( 1           ),
+  .TDEST_WIDTH ( 1           ),
+  .TUSER_WIDTH ( 1           )
 ) video_o (
-  .aclk        ( rd_clk  ),
-  .aresetn     ( !rd_rst )
+  .aclk        ( rd_clk      ),
+  .aresetn     ( !rd_rst     )
 );
 
 AXI4StreamSlave #(
-  .TDATA_WIDTH ( 16 ),
-  .TID_WIDTH   ( 1  ),
-  .TDEST_WIDTH ( 1  ),
-  .TUSER_WIDTH ( 1  ),
-  .VERBOSE     ( 0  )
+  .TDATA_WIDTH ( TDATA_WIDTH ),
+  .TID_WIDTH   ( 1           ),
+  .TDEST_WIDTH ( 1           ),
+  .TUSER_WIDTH ( 1           ),
+  .VERBOSE     ( 0           )
 ) video_receiver;
 
 axi4_if #(
@@ -295,7 +305,8 @@ frame_buffer #(
   .START_ADDR    ( 32'h3fff0000 ),
   .FRAMES_AMOUNT ( 3            ),
   .FRAME_RES_X   ( FRAME_RES_X  ),
-  .FRAME_RES_Y   ( FRAME_RES_Y  )
+  .FRAME_RES_Y   ( FRAME_RES_Y  ),
+  .TDATA_WIDTH   ( TDATA_WIDTH  )
 ) DUT (
   .wr_clk_i      ( wr_clk       ),
   .wr_rst_i      ( wr_rst       ),
@@ -329,12 +340,9 @@ initial
     while( !DUT.rd_done_stb_rd_clk )
       @( posedge rd_clk );
     @( posedge rd_clk );
-    repeat( 4 )
-      begin
-        while( !( video_o.tvalid && video_o.tlast && video_o.tready ) )
-          @( posedge rd_clk );
-        @( posedge rd_clk );
-      end
+    while( !( DUT.video_64_o_d.tvalid && DUT.video_64_o_d.tuser && DUT.video_64_o_d.tready ) )
+      @( posedge rd_clk );
+    @( posedge rd_clk );
     while( rx_video_mbx.num() > 0 )
       rx_video_mbx.get( dummy_q );
     fork
