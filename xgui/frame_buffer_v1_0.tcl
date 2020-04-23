@@ -1,7 +1,3 @@
-
-# Loading additional proc with user specified bodies to compute parameter values.
-source [file join [file dirname [file dirname [info script]]] gui/frame_buffe_v1_0.gtcl]
-
 # Definitional proc to organize widgets for parameters.
 proc init_gui { IPINST } {
   ipgui::add_param $IPINST -name "Component_Name"
@@ -16,34 +12,6 @@ proc init_gui { IPINST } {
   ipgui::add_param $IPINST -name "TDATA_WIDTH_B" -parent ${Page_0}
 
 
-}
-
-proc update_PARAM_VALUE.TDATA_WIDTH { PARAM_VALUE.TDATA_WIDTH PARAM_VALUE.PX_WIDTH } {
-	# Procedure called to update TDATA_WIDTH when any of the dependent parameters in the arguments change
-	
-	set TDATA_WIDTH ${PARAM_VALUE.TDATA_WIDTH}
-	set PX_WIDTH ${PARAM_VALUE.PX_WIDTH}
-	set values(PX_WIDTH) [get_property value $PX_WIDTH]
-	set_property value [gen_USERPARAMETER_TDATA_WIDTH_VALUE $values(PX_WIDTH)] $TDATA_WIDTH
-}
-
-proc validate_PARAM_VALUE.TDATA_WIDTH { PARAM_VALUE.TDATA_WIDTH } {
-	# Procedure called to validate TDATA_WIDTH
-	return true
-}
-
-proc update_PARAM_VALUE.TDATA_WIDTH_B { PARAM_VALUE.TDATA_WIDTH_B PARAM_VALUE.TDATA_WIDTH } {
-	# Procedure called to update TDATA_WIDTH_B when any of the dependent parameters in the arguments change
-	
-	set TDATA_WIDTH_B ${PARAM_VALUE.TDATA_WIDTH_B}
-	set TDATA_WIDTH ${PARAM_VALUE.TDATA_WIDTH}
-	set values(TDATA_WIDTH) [get_property value $TDATA_WIDTH]
-	set_property value [gen_USERPARAMETER_TDATA_WIDTH_B_VALUE $values(TDATA_WIDTH)] $TDATA_WIDTH_B
-}
-
-proc validate_PARAM_VALUE.TDATA_WIDTH_B { PARAM_VALUE.TDATA_WIDTH_B } {
-	# Procedure called to validate TDATA_WIDTH_B
-	return true
 }
 
 proc update_PARAM_VALUE.FRAMES_AMOUNT { PARAM_VALUE.FRAMES_AMOUNT } {
@@ -88,6 +56,24 @@ proc update_PARAM_VALUE.START_ADDR { PARAM_VALUE.START_ADDR } {
 
 proc validate_PARAM_VALUE.START_ADDR { PARAM_VALUE.START_ADDR } {
 	# Procedure called to validate START_ADDR
+	return true
+}
+
+proc update_PARAM_VALUE.TDATA_WIDTH { PARAM_VALUE.TDATA_WIDTH } {
+	# Procedure called to update TDATA_WIDTH when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.TDATA_WIDTH { PARAM_VALUE.TDATA_WIDTH } {
+	# Procedure called to validate TDATA_WIDTH
+	return true
+}
+
+proc update_PARAM_VALUE.TDATA_WIDTH_B { PARAM_VALUE.TDATA_WIDTH_B } {
+	# Procedure called to update TDATA_WIDTH_B when any of the dependent parameters in the arguments change
+}
+
+proc validate_PARAM_VALUE.TDATA_WIDTH_B { PARAM_VALUE.TDATA_WIDTH_B } {
+	# Procedure called to validate TDATA_WIDTH_B
 	return true
 }
 

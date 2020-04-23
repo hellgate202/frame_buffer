@@ -1,3 +1,0 @@
-# This file is automatically written.  Do not modify.
-proc gen_USERPARAMETER_TDATA_WIDTH_VALUE {PX_WIDTH } {expr $PX_WIDTH % 8 ? ( $PX_WIDTH / 8 + 1 ) * 8 : $PX_WIDTH}
-proc gen_USERPARAMETER_TDATA_WIDTH_B_VALUE {TDATA_WIDTH } {expr $TDATA_WIDTH / 8}
