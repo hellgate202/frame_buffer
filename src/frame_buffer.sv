@@ -234,4 +234,24 @@ assign video_o.tdest        = video_local_o.tdest;
 assign video_o.tuser        = video_local_o.tuser;
 assign video_local_o.tready = video_o.tready;
 
+localparam int LINE_CNT_WIDTH = $clog2( FRAME_RES_Y );
+
+(* MARK_DEBUG == "TRUE" *) logic [LOCAL_TDATA_WIDTH - 1 : 0] video_o_tdata  = video_o.tdata;
+(* MARK_DEBUG == "TRUE" *) logic                             video_o_tvalid = video_o.tvalid;
+(* MARK_DEBUG == "TRUE" *) logic                             video_o_tready = video_o.tready;
+(* MARK_DEBUG == "TRUE" *) logic                             video_o_tlast  = video_o.tlast;
+(* MARK_DEBUG == "TRUE" *) logic                             video_o_tuser  = video_o.tuser;
+(* MARK_DEBUG == "TRUE" *) logic [LINE_CNT_WIDTH - 1 : 0]    line_cnt;
+
+always_ff @( posedge rd_clk_i, posedge rd_rst_i )
+  if( rst_i )
+    line_cnt <= LINE_SIZE_WIDTH'( 0 );
+  else
+    if( video_o.tvalid && video_o.tready )
+      if( video_o.tuser )
+        line_cnt <= LINE_SIZE_WIDTH'( 0 );
+      else
+        if( video_o.tlast )
+          line_cnt <= line_cnt + 1'b1;
+
 endmodule
