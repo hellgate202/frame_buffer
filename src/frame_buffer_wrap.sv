@@ -5,7 +5,8 @@ module frame_buffer_wrap #(
   parameter int FRAME_RES_X   = 1920,
   parameter int PX_WIDTH      = 10,
   parameter int TDATA_WIDTH   = 16,
-  parameter int TDATA_WIDTH_B = 2
+  parameter int TDATA_WIDTH_B = 2,
+  parameter int CAPTURE_EN    = 0
 )(
   input                          wr_clk_i,
   input                          wr_rst_i,
@@ -286,7 +287,8 @@ frame_buffer #(
   .FRAMES_AMOUNT ( FRAMES_AMOUNT ),
   .FRAME_RES_Y   ( FRAME_RES_Y   ),
   .FRAME_RES_X   ( FRAME_RES_X   ),
-  .TDATA_WIDTH   ( TDATA_WIDTH   )
+  .TDATA_WIDTH   ( TDATA_WIDTH   ),
+  .CAPTURE_EN    ( CAPTURE_EN    )
 ) frame_buffer_inst (
   .wr_clk_i      ( wr_clk_i      ),
   .wr_rst_i      ( wr_rst_i      ),

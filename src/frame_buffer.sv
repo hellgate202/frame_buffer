@@ -3,7 +3,8 @@ module frame_buffer #(
   parameter int FRAMES_AMOUNT = 3,
   parameter int FRAME_RES_Y   = 1080,
   parameter int FRAME_RES_X   = 1920,
-  parameter int TDATA_WIDTH   = 16
+  parameter int TDATA_WIDTH   = 16,
+  parameter int CAPTURE_EN    = 0
 )(
   input                 wr_clk_i,
   input                 wr_rst_i,
@@ -241,7 +242,18 @@ localparam int LINE_CNT_WIDTH = $clog2( FRAME_RES_Y );
 (* MARK_DEBUG = "TRUE" *) logic                             video_o_tready = video_o.tready;
 (* MARK_DEBUG = "TRUE" *) logic                             video_o_tlast  = video_o.tlast;
 (* MARK_DEBUG = "TRUE" *) logic                             video_o_tuser  = video_o.tuser;
+(* MARK_DEBUG = "TRUE" *) logic                             video_o_tfirst;
 (* MARK_DEBUG = "TRUE" *) logic [LINE_CNT_WIDTH - 1 : 0]    line_cnt;
+
+always_ff @( posedge rd_clk_i, posedge rd_rst_i )
+  if( rd_rst_i )
+    video_o_tfirst <= 1'b1;
+  else
+    if( video_o.tvalid && video_o.tready )
+      if( video_o.tlast )
+        video_o_tfirst <= 1'b1;
+      else
+        video_o_tfirst <= 1'b0;
 
 always_ff @( posedge rd_clk_i, posedge rd_rst_i )
   if( rd_rst_i )
