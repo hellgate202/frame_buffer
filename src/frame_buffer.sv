@@ -235,35 +235,64 @@ assign video_o.tdest        = video_local_o.tdest;
 assign video_o.tuser        = video_local_o.tuser;
 assign video_local_o.tready = video_o.tready;
 
-localparam int LINE_CNT_WIDTH = $clog2( FRAME_RES_Y );
+generate
+  if( CAPTURE_EN )
+    begin : capture_logic 
+      localparam int LINE_CNT_WIDTH = $clog2( FRAME_RES_Y );
+      
+      (* MARK_DEBUG = "TRUE" *) logic [7 : 0]                     video_o_r;
+      (* MARK_DEBUG = "TRUE" *) logic [7 : 0]                     video_o_g;
+      (* MARK_DEBUG = "TRUE" *) logic [7 : 0]                     video_o_b;
+      (* MARK_DEBUG = "TRUE" *) logic                             video_o_tvalid;
+      (* MARK_DEBUG = "TRUE" *) logic                             video_o_tready;
+      (* MARK_DEBUG = "TRUE" *) logic                             video_o_tlast;
+      (* MARK_DEBUG = "TRUE" *) logic                             video_o_tuser;
+      (* MARK_DEBUG = "TRUE" *) logic                             video_o_tfirst;
+      (* MARK_DEBUG = "TRUE" *) logic [LINE_CNT_WIDTH - 1 : 0]    line_cnt;
+      
+      always_ff @( posedge rd_clk_i, posedge rd_rst_i )
+        if( rd_rst_i )
+          begin
+            video_o_r      <= 8'd0;
+            video_o_g      <= 8'd0;
+            video_o_b      <= 8'd0;
+            video_o_tvalid <= 1'b0;
+            video_o_tready <= 1'b0;
+            video_o_tlast  <= 1'b0;
+            video_o_tuser  <= 1'b0;
+          end
+        else
+          begin
+            video_o_r      <= video_o.tdata[29 : 22];
+            video_o_g      <= video_o.tdata[9 : 2];
+            video_o_b      <= video_o.tdata[19 : 12];
+            video_o_tvalid <= video_o.tvalid;
+            video_o_tready <= video_o.tready;
+            video_o_tlast  <= video_o.tlast;
+            video_o_tuser  <= video_o.tuser;
+          end
 
-(* MARK_DEBUG = "TRUE" *) logic [LOCAL_TDATA_WIDTH - 1 : 0] video_o_tdata  = video_o.tdata;
-(* MARK_DEBUG = "TRUE" *) logic                             video_o_tvalid = video_o.tvalid;
-(* MARK_DEBUG = "TRUE" *) logic                             video_o_tready = video_o.tready;
-(* MARK_DEBUG = "TRUE" *) logic                             video_o_tlast  = video_o.tlast;
-(* MARK_DEBUG = "TRUE" *) logic                             video_o_tuser  = video_o.tuser;
-(* MARK_DEBUG = "TRUE" *) logic                             video_o_tfirst;
-(* MARK_DEBUG = "TRUE" *) logic [LINE_CNT_WIDTH - 1 : 0]    line_cnt;
-
-always_ff @( posedge rd_clk_i, posedge rd_rst_i )
-  if( rd_rst_i )
-    video_o_tfirst <= 1'b1;
-  else
-    if( video_o.tvalid && video_o.tready )
-      if( video_o.tlast )
-        video_o_tfirst <= 1'b1;
-      else
-        video_o_tfirst <= 1'b0;
-
-always_ff @( posedge rd_clk_i, posedge rd_rst_i )
-  if( rd_rst_i )
-    line_cnt <= LINE_SIZE_WIDTH'( 0 );
-  else
-    if( video_o.tvalid && video_o.tready )
-      if( video_o.tuser )
-        line_cnt <= LINE_SIZE_WIDTH'( 0 );
-      else
-        if( video_o.tlast )
-          line_cnt <= line_cnt + 1'b1;
+      always_ff @( posedge rd_clk_i, posedge rd_rst_i )
+        if( rd_rst_i )
+          video_o_tfirst <= 1'b1;
+        else
+          if( video_o_tvalid && video_o_tready )
+            if( video_o_tlast )
+              video_o_tfirst <= 1'b1;
+            else
+              video_o_tfirst <= 1'b0;
+      
+      always_ff @( posedge rd_clk_i, posedge rd_rst_i )
+        if( rd_rst_i )
+          line_cnt <= LINE_SIZE_WIDTH'( 0 );
+        else
+          if( video_o_tvalid && video_o_tready )
+            if( video_o.tuser )
+              line_cnt <= LINE_SIZE_WIDTH'( 0 );
+            else
+              if( video_o_tlast )
+                line_cnt <= line_cnt + 1'b1;
+    end
+endgenerate
 
 endmodule
