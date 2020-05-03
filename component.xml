@@ -2797,6 +2797,11 @@
         <spirit:displayName>Tdata Width B</spirit:displayName>
         <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.TDATA_WIDTH_B">2</spirit:value>
       </spirit:modelParameter>
+      <spirit:modelParameter spirit:dataType="int">
+        <spirit:name>CAPTURE_EN</spirit:name>
+        <spirit:displayName>Capture En</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.CAPTURE_EN">0</spirit:value>
+      </spirit:modelParameter>
     </spirit:modelParameters>
   </spirit:model>
   <spirit:fileSets>
@@ -2982,6 +2987,11 @@
       <spirit:displayName>Tdata Width B</spirit:displayName>
       <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.TDATA_WIDTH_B">2</spirit:value>
     </spirit:parameter>
+      <spirit:parameter spirit:dataType="int">
+        <spirit:name>CAPTURE_EN</spirit:name>
+        <spirit:displayName>Capture En</spirit:displayName>
+        <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="MODELPARAM_VALUE.CAPTURE_EN">0</spirit:value>
+      </spirit:parameter>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
       <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">frame_buffer_wrap_v1_0</spirit:value>
